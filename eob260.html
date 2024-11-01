@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>360View</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <!-- <script src="https://raw.githubusercontent.com/supermedium/superframe/master/components/look-at/dist/aframe-look-at-component.min.js"></script> -->
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+    <script>
+      // AFRAME.registerComponent('navigate-on-click', {
+      //   schema: {
+      //     dest: {default: ''},
+      //     pos: {default: ''}
+      //   },
+
+      //   init: function () {
+      //     var data = this.data;
+      //     var el = this.el;
+
+      //     el.addEventListener('click', function () {
+      //       document.getElementById("img-360").src = data.dest;
+      //       document.getElementById("img-360").src = data.pos;
+      //     });
+      //   }
+      // });
+      AFRAME.registerComponent('navigate-on-click', {
+        schema: {
+          dest: { default: '' },  // The new image source for the 360° view
+          pos: { default: '' }    // Optional: any additional data, like position, if needed
+          },
+
+          init: function () {
+            var data = this.data;
+            var el = this.el;
+
+            el.addEventListener('click', function () {
+            // Select the main 360° image element
+            var environ = document.getElementById("img-360");
+
+            // Update the 360° image source with the 'dest' provided by the waypoint
+            var destSrc = el.getAttribute('dest');  // Retrieve 'dest' manually
+            environ.setAttribute("src", destSrc);
+            console.log(destSrc);
+
+            // Update visibility for waypoints
+            var waypoints = document.querySelectorAll('[name="waypoint"]');
+
+            // Hide the clicked waypoint and show others
+            for (var i = 0; i < waypoints.length; i++) {
+              if (waypoints[i] === el) {  
+                waypoints[i].setAttribute("visible", "false");  // Hide the clicked waypoint
+              } else {
+                waypoints[i].setAttribute("visible", "true");  // Show other waypoints
+              }
+            }
+            });
+          }
+      });
+    </script>
+  </head>
+  <body>
+<script>
+    window.addEventListener("wheel", (event) => {
+      // small increments for smoother zooming
+      const delta = -event.deltaY / 500; // Adjust divisor to control zoom speed
+      var mycam = document.getElementById("cam").getAttribute("camera");
+      var finalZoom =
+        document.getElementById("cam").getAttribute("camera").zoom + delta;
+  
+      // limiting the zoom
+      if (finalZoom < 0.5) finalZoom = 0.5;
+      if (finalZoom > 2) finalZoom = 2;
+      mycam.zoom = finalZoom;
+  
+      document.getElementById("cam").setAttribute("camera", mycam);
+    });
+</script>  
+    <a-scene>
+      <a-entity raycaster="objects: .clickable" cursor></a-entity>
+      <a-assets>
+        <img id="img" src="EOB260/QooCam/podium.jpg" />
+        <img id="img2" src="EOB260/QooCam/standingCenter.jpg" />
+        <img id="waypoint" src="waypoint.png" />
+      </a-assets>
+      <a-sky class="not-clickable" id="img-360" position="0 0 0" rotation="0 90 0" src="#img" visible="true"> </a-sky>
+      <a-sky class="not-clickable" id="img-360" position="0 0 0" rotation="0 90 0" src="#img2" visible="false"> </a-sky>
+      <!-- <a-sky id="img-360" position="0 0 0" rotation="0 90 0" src="#img3" visible="false"> </a-sky> -->
+      <a-image class="clickable" name="waypoint" src="#waypoint" position="0 1 -4" look-at="#cam" visible="true" navigate-on-click dest="#img2"></a-image>
+      <a-image class="clickable" name="waypoint" src="#waypoint" position="-2 1 -6" look-at="#cam" visible="false" navigate-on-click dest="#img"></a-image>
+      <!-- camera rig -->
+      
+      <a-entity id="player">
+        <!-- camera -->
+        <a-entity id="cam" camera="zoom: 1" movement-controls="controls: checkpoint" checkpoint-controls="mode: animate; animateSpeed: 3" position="0 1.6 3" look-controls="reverseMouseDrag: true" mouse-cursor cursor="rayOrigin: mouse;"
+        raycaster="objects: .clickable"></a-entity>
+        <!-- hand controls -->
+
+      </a-entity>
+    </a-scene>
+  </body>
+</html>
